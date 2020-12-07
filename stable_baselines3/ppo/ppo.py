@@ -234,6 +234,14 @@ class PPO(OnPolicyAlgorithm):
         self.value_loss = np.mean(value_losses)
         self.loss = loss.item()
         self.reward = np.mean(self.rollout_buffer.rewards)
+        # only added to when episode terminates
+        # False = 0 means episode terminated due to max iters
+        # True = 1 means episode terminated due to success
+        if len(self.ep_success_buffer) > 0:
+            self.success_rate = sum(self.ep_success_buffer) / float(len(self.ep_success_buffer))
+        else:
+            self.success_rate = 0
+        self.ep_success_buffer.clear()  # empty buffer
 
         self._n_updates += self.n_epochs
         explained_var = explained_variance(
@@ -283,4 +291,3 @@ class PPO(OnPolicyAlgorithm):
             eval_log_path=eval_log_path,
             reset_num_timesteps=reset_num_timesteps,
         )
-
